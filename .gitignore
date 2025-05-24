@@ -1,0 +1,15 @@
+# Virtual environment folders
+**/venv/
+
+# Python cache
+**/__pycache__/
+
+# Compiled Python files
+*.pyc
+*.pyo
+*.pyd
+
+# Coverage data
+.coverage
+coverage.xml
+htmlcov/
