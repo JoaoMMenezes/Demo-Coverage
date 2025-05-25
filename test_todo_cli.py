@@ -17,7 +17,6 @@ def test_criar_tarefa_sem_descricao_deve_lancar_erro():
         Tarefa(None) # type: ignore
     assert "descrição da tarefa não pode ser vazia" in str(excinfo_none.value)
 
-
 def test_marcar_tarefa_como_concluida():
     tarefa = Tarefa("Estudar Pytest")
     tarefa.marcar_como_concluida()
@@ -29,6 +28,13 @@ def test_representacao_string_tarefa():
     tarefa_concluida = Tarefa("Fazer café")
     tarefa_concluida.marcar_como_concluida()
     assert str(tarefa_concluida) == "Fazer café [Concluída]"
+
+def test_marcar_tarefa_pendente():
+    tarefa = Tarefa("Lavar Louça")
+    tarefa.marcar_como_concluida()
+    tarefa.marcar_como_pendente()
+    
+    assert tarefa.concluida == False
 
 # --- Testes para a classe GerenciadorTarefas ---
 @pytest.fixture
@@ -105,7 +111,21 @@ def test_listar_tarefas_pendentes_e_concluidas_separadamente(gerenciador):
     assert len(concluidas) == 1
     assert concluidas[0][1] == "Para Concluir 1 [Concluída]"
 
+def test_listar_todas_tarefas_sem_filtro(gerenciador):
+    gerenciador.adicionar_tarefa("Pendente 1")
+    gerenciador.adicionar_tarefa("Para Concluir 1")
+    gerenciador.adicionar_tarefa("Pendente 2")
+
+    gerenciador.marcar_como_concluida("2")
+    
+    tarefas = gerenciador.listar_tarefas()
+    
+    assert len(tarefas) == 3
+    descricoes = [t[1] for t in tarefas]
+    assert "Pendente 1 [Pendente]" in descricoes
+    assert "Para Concluir 1 [Concluída]" in descricoes
+    assert "Pendente 2 [Pendente]" in descricoes
+
 # Adicione mais testes:
 # - Testar a remoção de uma tarefa e como isso afeta os índices das demais.
-# - Testar listar todas as tarefas (pendentes e concluídas misturadas).
 # - Testar o comportamento quando a lista está vazia para todas as operações.
