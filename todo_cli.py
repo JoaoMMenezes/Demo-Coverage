@@ -1,5 +1,3 @@
-# todo_cli.py
-
 class Tarefa:
     def __init__(self, descricao):
         if not descricao or not isinstance(descricao, str):
@@ -20,7 +18,7 @@ class Tarefa:
 
 class GerenciadorTarefas:
     def __init__(self):
-        self._tarefas = [] # Usar _ para indicar uso interno
+        self._tarefas = []
 
     def adicionar_tarefa(self, descricao_tarefa):
         """Adiciona uma nova tarefa à lista."""

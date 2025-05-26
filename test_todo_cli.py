@@ -1,4 +1,3 @@
-# test_todo_cli.py
 import pytest
 from todo_cli import Tarefa, GerenciadorTarefas
 

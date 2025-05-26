@@ -70,3 +70,23 @@ Com o ambiente virtual ativado e as dependências instaladas, você pode executa
 ```bash
 python todo_cli.py
 ```
+
+### Rodando testes com o Coverage.py
+
+1. Execute os testes através do coverage:
+
+```bash
+coverage run -m pytest
+```
+
+2. Visualize o relatório de cobertura no terminal:
+
+```bash
+coverage report -m
+```
+
+3. Gere um relatório HTML interativo
+
+```bash
+coverage html
+```
