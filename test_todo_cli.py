@@ -1,5 +1,8 @@
 import pytest
 from todo_cli import Tarefa, GerenciadorTarefas
+from unittest.mock import patch
+import subprocess
+
 
 # --- Testes para a classe Tarefa ---
 def test_criar_tarefa_com_descricao():
@@ -125,6 +128,102 @@ def test_listar_todas_tarefas_sem_filtro(gerenciador):
     assert "Para Concluir 1 [Concluída]" in descricoes
     assert "Pendente 2 [Pendente]" in descricoes
 
-# Adicione mais testes:
-# - Testar a remoção de uma tarefa e como isso afeta os índices das demais.
-# - Testar o comportamento quando a lista está vazia para todas as operações.
+# --- Testes de fluxo e interface ---
+
+def test_exibir_menu_chama_input():
+    with patch('builtins.input', return_value='1') as mock_input:
+        from todo_cli import exibir_menu
+        resultado = exibir_menu()
+        mock_input.assert_called_once()
+        assert resultado == '1'
+
+def test_main_lista_tarefas_pendentes():
+    with patch('builtins.input', side_effect=['1', 'Tarefa 1', '2', '6']):
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("1. Tarefa 1 [Pendente]")
+
+def test_main_opcao_invalida():
+    with patch('builtins.input', side_effect=['99', '6']):
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("Opção inválida. Tente novamente.")
+
+def test_main_adiciona_tarefa_com_descricao_invalida():
+    with patch('builtins.input', side_effect=['1', '', '6']):  # Usando string vazia em vez de None
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            # Verifica ambas as mensagens de erro possíveis
+            assert any(
+                "Erro: A descrição não pode ser vazia." in str(call) or
+                "Erro ao adicionar tarefa (verifique a descrição)." in str(call)
+                for call in mock_print.call_args_list
+            )
+
+def test_main_lista_tarefas_pendentes_vazias():
+    with patch('builtins.input', side_effect=['2', '6']):  # Lista pendentes sem ter tarefas
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("Nenhuma tarefa pendente.")
+
+def test_main_lista_tarefas_concluidas_vazias():
+    with patch('builtins.input', side_effect=['3', '6']):  # Lista concluídas sem ter tarefas
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("Nenhuma tarefa concluída.")
+
+def test_main_marca_tarefa_como_concluida_sem_tarefas():
+    with patch('builtins.input', side_effect=['4', '6']):  # Tenta marcar como concluída sem tarefas
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("Nenhuma tarefa pendente para marcar.")
+
+def test_main_marca_tarefa_como_concluida_indice_invalido():
+    with patch('builtins.input', side_effect=['1', 'Tarefa Teste', '4', '99', '6']):  # Índice inválido
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("Erro: Tarefa não encontrada, já concluída ou índice inválido.")
+
+def test_main_remove_tarefa_sem_tarefas():
+    with patch('builtins.input', side_effect=['5', '6']):  # Tenta remover sem tarefas
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("Nenhuma tarefa para remover.")
+
+def test_main_remove_tarefa_indice_invalido():
+    with patch('builtins.input', side_effect=['1', 'Tarefa Teste', '5', '99', '6']):  # Índice inválido
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            mock_print.assert_any_call("Erro: Tarefa não encontrada ou índice inválido.")
+
+def test_main_remove_tarefa_com_entrada_invalida():
+    with patch('builtins.input', side_effect=['1', 'Tarefa Teste', '5', 'abc', '6']):
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            # Verifica se a mensagem de erro foi impressa em algum momento
+            assert any(
+                "Erro: Índice inválido." in str(call) or
+                "Erro: Tarefa não encontrada ou índice inválido." in str(call)
+                for call in mock_print.call_args_list
+            )
+def test_main_marca_tarefa_com_entrada_invalida():
+    with patch('builtins.input', side_effect=['1', 'Tarefa Teste', '4', 'abc', '6']):
+        with patch('builtins.print') as mock_print:
+            from todo_cli import main
+            main()
+            # Verifica se a mensagem de erro foi impressa em algum momento
+            assert any(
+                "Erro: Índice inválido." in str(call) or
+                "Erro: Tarefa não encontrada, já concluída ou índice inválido." in str(call)
+                for call in mock_print.call_args_list
+            )
